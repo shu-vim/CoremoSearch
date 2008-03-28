@@ -23,7 +23,7 @@ endfunction
 function! s:CoremoSearch_execute()
     let old_a = @a
 
-    execute "normal \<ESC>"
+    execute "normal \<ESC>vaw\<ESC>"
     normal viw"ay
 
     echo 'Coremo Search: ' . @a
@@ -46,8 +46,7 @@ endfunction
 
 function! s:CoremoSearch_delete()
     let old_a = @a
-
-    execute "normal \<ESC>"
+    execute "normal \<ESC>vaw\<ESC>"
     normal viw"ay
 
     echo 'Forgot: ' . @a
@@ -74,5 +73,5 @@ function! s:CoremoSearch__deleteInner(expr)
 endfunction
 
 function! s:CoremoSearch__escape(expr)
-    return escape(a:expr, '\$.*/a[]^')
+    return escape(a:expr, '\$.*/[]^')
 endfunction
