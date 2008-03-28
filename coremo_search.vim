@@ -14,7 +14,7 @@ function! s:CoremoSearch_executeV()
     execute "normal \<ESC>"
     normal gv"ay
 
-    echo 'Search Target added `' . @a . '`'
+    echo 'Coremo Search: ' . @a
     call s:CoremoSearch__add(@a)
 
     let @a = old_a
@@ -26,7 +26,7 @@ function! s:CoremoSearch_execute()
     execute "normal \<ESC>"
     normal viw"ay
 
-    echo 'Search Target added `' . @a . '`'
+    echo 'Coremo Search: ' . @a
     call s:CoremoSearch__add('\<' . @a . '\>')
 
     let @a = old_a
@@ -38,7 +38,7 @@ function! s:CoremoSearch_deleteV()
     execute "normal \<ESC>"
     normal gv"ay
 
-    echo 'Search Target deleted `' . @a . '`'
+    echo 'Forgot: ' . @a
     call s:CoremoSearch__deleteInner(@a)
 
     let @a = old_a
@@ -50,7 +50,7 @@ function! s:CoremoSearch_delete()
     execute "normal \<ESC>"
     normal viw"ay
 
-    echo 'Search Target deleted `' . @a . '`'
+    echo 'Forgot: ' . @a
     call s:CoremoSearch__deleteInner('\<' . @a . '\>')
 
     let @a = old_a
