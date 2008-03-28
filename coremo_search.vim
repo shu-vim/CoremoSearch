@@ -15,7 +15,7 @@ function! s:CoremoSearch_executeV()
     normal gv"ay
 
     echo 'Coremo Search: ' . @a
-    call s:CoremoSearch__add(@a)
+    call s:CoremoSearch__add(s:CoremoSearch__escape(@a))
 
     let @a = old_a
 endfunction
@@ -27,7 +27,7 @@ function! s:CoremoSearch_execute()
     normal viw"ay
 
     echo 'Coremo Search: ' . @a
-    call s:CoremoSearch__add('\<' . @a . '\>')
+    call s:CoremoSearch__add(s:CoremoSearch__escape(@a))
 
     let @a = old_a
 endfunction
@@ -39,7 +39,7 @@ function! s:CoremoSearch_deleteV()
     normal gv"ay
 
     echo 'Forgot: ' . @a
-    call s:CoremoSearch__deleteInner(@a)
+    call s:CoremoSearch__deleteInner(s:CoremoSearch__escape(@a))
 
     let @a = old_a
 endfunction
@@ -51,7 +51,7 @@ function! s:CoremoSearch_delete()
     normal viw"ay
 
     echo 'Forgot: ' . @a
-    call s:CoremoSearch__deleteInner('\<' . @a . '\>')
+    call s:CoremoSearch__deleteInner(s:CoremoSearch__escape(@a))
 
     let @a = old_a
 endfunction
@@ -66,9 +66,13 @@ endfunction
 
 function! s:CoremoSearch__deleteInner(expr)
     let all = sort(split(@/, '\\|'))
-    let idx = index(all, a:expr)
+    let idx = max([index(all, a:expr), index(all, '\<' . a:expr . '\>')])
     if idx != -1
         call remove(all, idx)
     endif
     let @/ = join(all, '\|')
+endfunction
+
+function! s:CoremoSearch__escape(expr)
+    return escape(a:expr, '\$.*/a[]^')
 endfunction
