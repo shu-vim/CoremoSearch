@@ -61,18 +61,14 @@ function! s:CoremoSearch__add(expr)
     if index(all, a:expr) == -1
         call add(all, a:expr)
     endif
-    if len(all) != 0
-        let @/ = join(all, '\|')
-    endif
+    let @/ = join(all, '\|')
 endfunction
 
 function! s:CoremoSearch__deleteInner(expr)
     let all = sort(split(@/, '\\|'))
     let idx = index(all, a:expr)
     if idx != -1
-        call remove(all, a:expr)
+        call remove(all, idx)
     endif
-    if len(all) != 0
-        let @/ = join(all, '\|')
-    endif
+    let @/ = join(all, '\|')
 endfunction
