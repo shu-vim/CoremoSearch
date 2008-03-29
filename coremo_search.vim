@@ -15,6 +15,9 @@
 "       1. In visual mode, select the string that you want to search.
 "       2. Press <C-@> or :CoremoSearchAddV
 "
+"   C. Adding words with :CoremoSearchAdd command
+"       1. :CoremoSearchAdd regexp1 regexp2 ...
+"
 "   A'. Removing a word
 "       1. Place the cursor on the word.
 "       2. Press <Learder><C-@> or :CoremoSearchRemove
@@ -24,30 +27,53 @@
 "       1. In visual mode, select the string.
 "       2. Press <Learder><C-@> or :CoremoSearchRemoveV
 "           (in most cases, <Leader> equals to backslash(\) keystroke)
+"
+" Last Change: 29-Mar-2008
 
-command!  -range  CoremoSearchAdd      call <SID>CoremoSearch_add()
+command!  -range -nargs=*  CoremoSearchAdd      call <SID>CoremoSearch_add(<f-args>)
 command!  -range  CoremoSearchAddV     call <SID>CoremoSearch_addV()
 command!  -range  CoremoSearchRemove   call <SID>CoremoSearch_remove()
 command!  -range  CoremoSearchRemoveV  call <SID>CoremoSearch_removeV()
 
 nnoremap  <C-@>          :CoremoSearchAdd<CR>
+nnoremap  <Leader>/      :CoremoSearchAdd 
 vnoremap  <C-@>          :CoremoSearchAddV<CR>
+vnoremap  <Leader>/      :CoremoSearchAdd 
 nnoremap  <Leader><C-@>  :CoremoSearchRemove<CR>
 vnoremap  <Leader><C-@>  :CoremoSearchRemoveV<CR>
 
+
+function! s:CoremoSearch_add(...)
+    if len(a:000) == 0
+        let words = [s:CoremoSearch__escape(s:CoremoSearch__getWordUnderCursor())]
+    else
+        let words = a:000
+    endif
+
+    echo 'Coremo Search: ' . join(words, ', ')
+    call s:CoremoSearch__addInner(words)
+endfunction
+
 function! s:CoremoSearch_addV()
+    let word = s:CoremoSearch__getSelectedWord()
+
+    echo 'Coremo Search: ' . word
+    call s:CoremoSearch__addInner([s:CoremoSearch__escape(word)])
+endfunction
+
+function! s:CoremoSearch__getSelectedWord()
     let old_a = @a
 
     execute "normal \<ESC>"
     normal gv"ay
-
-    echo 'Coremo Search: ' . @a
-    call s:CoremoSearch__addInner(s:CoremoSearch__escape(@a))
+    let result = @a
 
     let @a = old_a
+
+    return result
 endfunction
 
-function! s:CoremoSearch_add()
+function! s:CoremoSearch__getWordUnderCursor()
     let old_a = @a
 
     execute "normal \<ESC>"
@@ -55,50 +81,39 @@ function! s:CoremoSearch_add()
         execute "normal vaw\<ESC>"
     endif
     normal viw"ay
-
-    echo 'Coremo Search: ' . @a
-    call s:CoremoSearch__addInner(s:CoremoSearch__escape(@a))
+    let result = @a
 
     let @a = old_a
+
+    return result
 endfunction
 
 function! s:CoremoSearch_removeV()
-    let old_a = @a
+    let word = s:CoremoSearch__getSelectedWord()
 
-    execute "normal \<ESC>"
-    normal gv"ay
-
-    echo 'Forgot: ' . @a
-    call s:CoremoSearch__removeInner(s:CoremoSearch__escape(@a))
-
-    let @a = old_a
+    echo 'Forgot: ' . word
+    call s:CoremoSearch__removeInner(s:CoremoSearch__escape(word))
 endfunction
 
 function! s:CoremoSearch_remove()
-    let old_a = @a
+    let word = s:CoremoSearch__getWordUnderCursor()
 
-    execute "normal \<ESC>"
-    if stridx(" \t　\r\n", getline('.')[col('.') - 1]) != -1
-        execute "normal vaw\<ESC>"
-    endif
-    normal viw"ay
-
-    echo 'Forgot: ' . @a
-    call s:CoremoSearch__removeInner(s:CoremoSearch__escape(@a))
-
-    let @a = old_a
+    echo 'Forgot: ' . word
+    call s:CoremoSearch__removeInner(s:CoremoSearch__escape(word))
 endfunction
 
-function! s:CoremoSearch__addInner(expr)
-    let all = sort(split(@/, '\\|'))
-    if index(all, a:expr) == -1
-        call add(all, a:expr)
-    endif
+function! s:CoremoSearch__addInner(exprs)
+    let all = sort(s:CoremoSearch__splitRegexpr(@/))
+    for e in a:exprs
+        if index(all, e) == -1
+            call add(all, e)
+        endif
+    endfor
     let @/ = join(all, '\|')
 endfunction
 
 function! s:CoremoSearch__removeInner(expr)
-    let all = sort(split(@/, '\\|'))
+    let all = sort(s:CoremoSearch__splitRegexpr(@/))
     let idx = max([index(all, a:expr), index(all, '\<' . a:expr . '\>')])
     if idx != -1
         call remove(all, idx)
@@ -108,6 +123,31 @@ endfunction
 
 function! s:CoremoSearch__escape(expr)
     return escape(a:expr, '\$.*/[]^')
+endfunction
+
+function! s:CoremoSearch__splitRegexpr(expr)
+    let all = split(a:expr, '\\|')
+    let result = []
+    let word = ''
+
+    for i in range(len(all))
+        if strlen(word) != 0 | let word .= '\|' | endif
+        let word .= all[i]
+
+        " search /\(/ and /\)/
+        let opening = len(split(' '.word.' ', '\\(\|[')) - 1
+        let closing = len(split(' '.word.' ', '\\)\|]')) - 1
+
+        if opening == closing
+            call add(result, word)
+            let word = ''
+        endif
+    endfor
+    if strlen(word) != 0
+        call add(result, word)
+    endif
+
+    return result
 endfunction
 
 " vim: set et ff=unix fileencoding=utf-8 sts=4 sw=4 ts=4 : 
