@@ -61,6 +61,20 @@ function! s:CoremoSearch_addV()
     call s:CoremoSearch__addInner([s:CoremoSearch__escape(word)])
 endfunction
 
+function! s:CoremoSearch_remove()
+    let word = s:CoremoSearch__getWordUnderCursor()
+
+    echo 'Forgot: ' . word
+    call s:CoremoSearch__removeInner(s:CoremoSearch__escape(word))
+endfunction
+
+function! s:CoremoSearch_removeV()
+    let word = s:CoremoSearch__getSelectedWord()
+
+    echo 'Forgot: ' . word
+    call s:CoremoSearch__removeInner(s:CoremoSearch__escape(word))
+endfunction
+
 function! s:CoremoSearch__getSelectedWord()
     let old_a = @a
 
@@ -86,20 +100,6 @@ function! s:CoremoSearch__getWordUnderCursor()
     let @a = old_a
 
     return result
-endfunction
-
-function! s:CoremoSearch_removeV()
-    let word = s:CoremoSearch__getSelectedWord()
-
-    echo 'Forgot: ' . word
-    call s:CoremoSearch__removeInner(s:CoremoSearch__escape(word))
-endfunction
-
-function! s:CoremoSearch_remove()
-    let word = s:CoremoSearch__getWordUnderCursor()
-
-    echo 'Forgot: ' . word
-    call s:CoremoSearch__removeInner(s:CoremoSearch__escape(word))
 endfunction
 
 function! s:CoremoSearch__addInner(exprs)
@@ -135,8 +135,8 @@ function! s:CoremoSearch__splitRegexpr(expr)
         let word .= all[i]
 
         " search /\(/ and /\)/
-        let opening = len(split(' '.word.' ', '\\(\|[')) - 1
-        let closing = len(split(' '.word.' ', '\\)\|]')) - 1
+        let opening = len(split(' '.word.' ', '\\(')) - 1
+        let closing = len(split(' '.word.' ', '\\)')) - 1
 
         if opening == closing
             call add(result, word)
