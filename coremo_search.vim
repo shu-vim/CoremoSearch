@@ -1,6 +1,6 @@
 " CoremoSearch -- A simple simultaneous search script.
 "
-" Maintainer: Shuhei Kubota <chimachima@gmail.com>
+" Maintainer: Shuhei Kubota <kubota.shuhei@gmail.com>
 " Description:
 "   This script provides simultaneous search functionality.
 "
