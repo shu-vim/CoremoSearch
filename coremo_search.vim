@@ -42,6 +42,17 @@ vnoremap  <Leader>/      :CoremoSearchAdd
 nnoremap  <Leader><C-@>  :CoremoSearchRemove<CR>
 vnoremap  <Leader><C-@>  :CoremoSearchRemoveV<CR>
 
+if !exists('g:CoremoSearch_colors')
+    let g:CoremoSearch_colors = [
+        \ {'bg': 'darkred',     'fg': 'white'},
+        \ {'bg': 'darkgreen',   'fg': 'white'},
+        \ {'bg': 'brown',       'fg': 'white'},
+        \ {'bg': 'darkblue',    'fg': 'white'},
+        \ {'bg': 'darkmagenta', 'fg': 'white'},
+        \ {'bg': 'darkcyan',    'fg': 'white'},
+        \ ]
+endif
+
 
 function! s:CoremoSearch_add(...)
     if len(a:000) == 0
@@ -119,6 +130,7 @@ function! s:CoremoSearch__addInner(exprs)
         endif
     endfor
     let @/ = join(all, '\|')
+    if ! &hlsearch | call s:CoremoSearch__refreshHightlights(all) | endif
 endfunction
 
 function! s:CoremoSearch__removeInner(expr)
@@ -146,6 +158,7 @@ function! s:CoremoSearch__removeInner(expr)
         endif
     endif
     let @/ = join(all, '\|')
+    if ! &hlsearch | call s:CoremoSearch__refreshHightlights(all) | endif
     return removed
 endfunction
 
@@ -176,6 +189,27 @@ function! s:CoremoSearch__splitRegexpr(expr)
     endif
 
     return result
+endfunction
+
+function! s:CoremoSearch__initHighlights()
+    for i in range(len(g:CoremoSearch_colors))
+        let cs = g:CoremoSearch_colors[i]
+
+        silent! execute 'syntax clear CoremoSearch'.i
+        execute 'highlight  CoremoSearch'.i.
+            \ ' ctermfg='.cs.fg.
+            \ ' ctermbg='.cs.bg.
+            \ ' guifg='.cs.fg.
+            \ ' guibg='.cs.bg
+    endfor
+endfunction
+
+function! s:CoremoSearch__refreshHightlights(words)
+    call s:CoremoSearch__initHighlights()
+    let colorsCount = len(g:CoremoSearch_colors)
+    for i in range(len(a:words))
+        execute 'syntax match CoremoSearch'.(i%colorsCount)." '".a:words[i]."' containedin=ALL"
+    endfor
 endfunction
 
 " vim: set et ff=unix fileencoding=utf-8 sts=4 sw=4 ts=4 : 
