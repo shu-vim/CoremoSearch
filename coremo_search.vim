@@ -5,6 +5,7 @@
 "   This script provides simultaneous search functionality.
 "
 "   You can add a string that you want to search and remove a string.
+"   Color highlighting is available setting :set[l] nohlsearch.
 "
 " Usage:
 "   A. Adding a word (like asterisk(*) keystroke)
@@ -28,7 +29,7 @@
 "       2. Press <Learder><C-@> or :CoremoSearchRemoveV
 "           (in most cases, <Leader> equals to backslash(\) keystroke)
 "
-" Last Change: 29-Mar-2008
+" Last Change: 30-Mar-2008
 
 command!  -range -nargs=*  CoremoSearchAdd      call <SID>CoremoSearch_add(<f-args>)
 command!  -range  CoremoSearchAddV     call <SID>CoremoSearch_addV()
