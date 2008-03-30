@@ -64,15 +64,23 @@ endfunction
 function! s:CoremoSearch_remove()
     let word = s:CoremoSearch__getWordUnderCursor()
 
-    echo 'Forgot: ' . word
-    call s:CoremoSearch__removeInner(s:CoremoSearch__escape(word))
+    let forgotten = s:CoremoSearch__removeInner(s:CoremoSearch__escape(word))
+    if strlen(forgotten) != 0
+        echo 'Forgot: ' . forgotten
+    else
+        echo ''
+    endif
 endfunction
 
 function! s:CoremoSearch_removeV()
     let word = s:CoremoSearch__getSelectedWord()
 
-    echo 'Forgot: ' . word
-    call s:CoremoSearch__removeInner(s:CoremoSearch__escape(word))
+    let forgotten = s:CoremoSearch__removeInner(s:CoremoSearch__escape(word))
+    if strlen(forgotten) != 0
+        echo 'Forgot: ' . forgotten
+    else
+        echo ''
+    endif
 endfunction
 
 function! s:CoremoSearch__getSelectedWord()
@@ -116,10 +124,29 @@ endfunction
 function! s:CoremoSearch__removeInner(expr)
     let all = s:CoremoSearch__splitRegexpr(@/)
     let idx = max([index(all, a:expr), index(all, '\<' . a:expr . '\>')])
+    let removed = ''
     if idx != -1
         call remove(all, idx)
+        let removed = a:expr
+    else " try to find other regexps
+        let candidates = filter(copy(all), "'".a:expr."' =~ v:val")
+        if len(candidates) != 0
+            let selectList = []
+            for i in range(len(candidates))
+                call add(selectList, (i+1).': '.candidates[i])
+            endfor
+            call insert(selectList, 'Which regexp do you want to remove?', 0)
+
+            let choise = inputlist(selectList) - 1
+
+            if -1 < choise && choise < len(candidates)
+                call remove(all, index(all, candidates[choise]))
+                let removed = candidates[choise]
+            endif
+        endif
     endif
     let @/ = join(all, '\|')
+    return removed
 endfunction
 
 function! s:CoremoSearch__escape(expr)
