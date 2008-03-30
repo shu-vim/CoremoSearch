@@ -78,7 +78,7 @@ endfunction
 function! s:CoremoSearch__getSelectedWord()
     let old_a = @a
 
-    execute "normal \<ESC>"
+    "execute "normal \<ESC>"
     normal gv"ay
     let result = @a
 
@@ -90,7 +90,7 @@ endfunction
 function! s:CoremoSearch__getWordUnderCursor()
     let old_a = @a
 
-    execute "normal \<ESC>"
+    "execute "normal \<ESC>"
     if stridx(" \t　\r\n", getline('.')[col('.') - 1]) != -1
         execute "normal vaw\<ESC>"
     endif
@@ -103,9 +103,10 @@ function! s:CoremoSearch__getWordUnderCursor()
 endfunction
 
 function! s:CoremoSearch__addInner(exprs)
-    let all = sort(s:CoremoSearch__splitRegexpr(@/))
+    let all = s:CoremoSearch__splitRegexpr(@/)
     for e in a:exprs
-        if index(all, e) == -1
+        let idx = max([index(all, e), index(all, '\<' . e . '\>')])
+        if idx == -1
             call add(all, e)
         endif
     endfor
@@ -113,7 +114,7 @@ function! s:CoremoSearch__addInner(exprs)
 endfunction
 
 function! s:CoremoSearch__removeInner(expr)
-    let all = sort(s:CoremoSearch__splitRegexpr(@/))
+    let all = s:CoremoSearch__splitRegexpr(@/)
     let idx = max([index(all, a:expr), index(all, '\<' . a:expr . '\>')])
     if idx != -1
         call remove(all, idx)
@@ -126,7 +127,7 @@ function! s:CoremoSearch__escape(expr)
 endfunction
 
 function! s:CoremoSearch__splitRegexpr(expr)
-    let all = split(a:expr, '\\|')
+    let all = split(a:expr, '\\\@<!\\|') " split by '\|' NOT next to '\'
     let result = []
     let word = ''
 
