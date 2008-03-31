@@ -42,6 +42,23 @@ vnoremap  <C-@>          :CoremoSearchAddV<CR>
 vnoremap  <Leader>/      :CoremoSearchAdd 
 nnoremap  <Leader><C-@>  :CoremoSearchRemove<CR>
 vnoremap  <Leader><C-@>  :CoremoSearchRemoveV<CR>
+"nnoremap  <Leader>/  :call <SID>Hoge_hookSearch()<CR>/
+"
+"let s:Hoge__atSlash = ''
+"
+"function! s:Hoge_hookSearch()
+"    let s:Hoge__atSlash = @/
+"    cnoremap  <CR>  <CR>:execute 'cunmap <'.'CR>'<CR>:execute 'cunmap <'.'ESC>'<CR>:call <SID>Hoge_showSlash()<CR>:echo<CR>
+"    cnoremap  <ESC>  <CR>:execute 'cunmap <'.'CR>'<CR>:execute 'cunmap <'.'ESC>'<CR>:echo<CR>
+"endfunction
+"
+"function! s:Hoge_showSlash()
+"    let word = @/
+"    let @/ = s:Hoge__atSlash
+"    if word == s:Hoge__atSlash | return | endif
+"
+"    execute 'CoremoSearchAdd '.word
+"endfunction
 
 if !exists('g:CoremoSearch_colors')
     let g:CoremoSearch_colors = [
