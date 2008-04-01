@@ -120,8 +120,9 @@ endif
 
 function! s:CoremoSearch__hookSearchStart()
     let b:CoremoSearch__atSlash = @/
+    let b:CoremoSearch__pos = getpos('.')
     cnoremap  <CR>   <CR>:execute 'cunmap <'.'CR>'<CR>:execute 'cunmap <'.'ESC>'<CR>:call <SID>CoremoSearch__hookSearchEnd()<CR>:echo<CR>
-    cnoremap  <ESC>  <CR>:execute 'cunmap <'.'CR>'<CR>:execute 'cunmap <'.'ESC>'<CR>:echo<CR>
+    cnoremap  <Esc>  <Esc>:execute 'cunmap <'.'CR>'<CR>:execute 'cunmap <'.'ESC>'<CR>:call <SID>CoremoSearch__hookSearchEndEsc()<CR>:echo<CR>
 endfunction
 
 function! s:CoremoSearch__hookSearchEnd()
@@ -131,6 +132,11 @@ function! s:CoremoSearch__hookSearchEnd()
     if word == b:CoremoSearch__atSlash | return | endif
 
     execute 'CoremoSearchAdd '.word
+endfunction
+
+function! s:CoremoSearch__hookSearchEndEsc()
+    if exists('b:CoremoSearch__atSlash') | let @/ = b:CoremoSearch__atSlash | endif
+    if exists('b:CoremoSearch__pos') | call setpos('.', b:CoremoSearch__pos) | endif
 endfunction
 
 
