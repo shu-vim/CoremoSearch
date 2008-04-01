@@ -91,21 +91,25 @@ if !exists('g:CoremoSearch_useSearchHook')
 endif
 
 if g:CoremoSearch_useSearchHook == 1
-    nnoremap <Leader>/  :call <SID>CoremoSearch__hookSearchStart()<CR>/
+    nnoremap           <Leader>/  :call <SID>CoremoSearch__hookSearchStart()<CR>/
+    nnoremap <silent>  n          :call <SID>CoremoSearch__refreshHightlights(<SID>CoremoSearch__splitRegexpr(@/))<CR>n
+    nnoremap <silent>  N          :call <SID>CoremoSearch__refreshHightlights(<SID>CoremoSearch__splitRegexpr(@/))<CR>N
 elseif g:CoremoSearch_useSearchHook == 2
-    nnoremap /          :call <SID>CoremoSearch__hookSearchStart()<CR>/
+    nnoremap           /          :call <SID>CoremoSearch__hookSearchStart()<CR>/
+    nnoremap <silent>  n          :call <SID>CoremoSearch__refreshHightlights(<SID>CoremoSearch__splitRegexpr(@/))<CR>n
+    nnoremap <silent>  N          :call <SID>CoremoSearch__refreshHightlights(<SID>CoremoSearch__splitRegexpr(@/))<CR>N
 endif
 
 if !exists('g:CoremoSearch_colors')
     " color highlighting
 
     let g:CoremoSearch_colors = [
-        \ {'bg': 'darkred',     'fg': 'white'}, " 1st word
-        \ {'bg': 'darkgreen',   'fg': 'white'}, " 2nd word
-        \ {'bg': 'brown',       'fg': 'white'}, " 3rd word
-        \ {'bg': 'darkblue',    'fg': 'white'}, " 4th word
-        \ {'bg': 'darkmagenta', 'fg': 'white'}, " 5th word
-        \ {'bg': 'darkcyan',    'fg': 'white'}, " 6th word
+        \ {'bg': 'darkred',     'fg': 'white'},
+        \ {'bg': 'darkgreen',   'fg': 'white'},
+        \ {'bg': 'brown',       'fg': 'white'},
+        \ {'bg': 'darkblue',    'fg': 'white'},
+        \ {'bg': 'darkmagenta', 'fg': 'white'},
+        \ {'bg': 'darkcyan',    'fg': 'white'},
         \ ]
 endif
 
@@ -118,7 +122,6 @@ function! s:CoremoSearch__hookSearchStart()
     let b:CoremoSearch__atSlash = @/
     cnoremap  <CR>   <CR>:execute 'cunmap <'.'CR>'<CR>:execute 'cunmap <'.'ESC>'<CR>:call <SID>CoremoSearch__hookSearchEnd()<CR>:echo<CR>
     cnoremap  <ESC>  <CR>:execute 'cunmap <'.'CR>'<CR>:execute 'cunmap <'.'ESC>'<CR>:echo<CR>
-
 endfunction
 
 function! s:CoremoSearch__hookSearchEnd()
@@ -282,6 +285,8 @@ function! s:CoremoSearch__initHighlights()
 endfunction
 
 function! s:CoremoSearch__refreshHightlights(words)
+    if &hlsearch | return | endif
+
     call s:CoremoSearch__initHighlights()
     let colorsCount = len(g:CoremoSearch_colors)
     for i in range(len(a:words))
