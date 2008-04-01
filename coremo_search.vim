@@ -31,34 +31,22 @@
 "
 " Last Change: 30-Mar-2008
 
-command!  -range -nargs=*  CoremoSearchAdd      call <SID>CoremoSearch_add(<f-args>)
-command!  -range  CoremoSearchAddV     call <SID>CoremoSearch_addV()
-command!  -range  CoremoSearchRemove   call <SID>CoremoSearch_remove()
-command!  -range  CoremoSearchRemoveV  call <SID>CoremoSearch_removeV()
+"---------------------
+" interfaces to users
+"---------------------
 
-nnoremap  <C-@>          :CoremoSearchAdd<CR>
-nnoremap  <Leader>/      :CoremoSearchAdd 
-vnoremap  <C-@>          :CoremoSearchAddV<CR>
-vnoremap  <Leader>/      :CoremoSearchAdd 
-nnoremap  <Leader><C-@>  :CoremoSearchRemove<CR>
-vnoremap  <Leader><C-@>  :CoremoSearchRemoveV<CR>
-"nnoremap  <Leader>/  :call <SID>Hoge_hookSearch()<CR>/
-"
-"let s:Hoge__atSlash = ''
-"
-"function! s:Hoge_hookSearch()
-"    let s:Hoge__atSlash = @/
-"    cnoremap  <CR>  <CR>:execute 'cunmap <'.'CR>'<CR>:execute 'cunmap <'.'ESC>'<CR>:call <SID>Hoge_showSlash()<CR>:echo<CR>
-"    cnoremap  <ESC>  <CR>:execute 'cunmap <'.'CR>'<CR>:execute 'cunmap <'.'ESC>'<CR>:echo<CR>
-"endfunction
-"
-"function! s:Hoge_showSlash()
-"    let word = @/
-"    let @/ = s:Hoge__atSlash
-"    if word == s:Hoge__atSlash | return | endif
-"
-"    execute 'CoremoSearchAdd '.word
-"endfunction
+command!  -range -nargs=*  CoremoSearchAdd      call <SID>CoremoSearch_add(<f-args>)
+command!  -range           CoremoSearchAddV     call <SID>CoremoSearch_addV()
+command!  -range           CoremoSearchRemove   call <SID>CoremoSearch_remove()
+command!  -range           CoremoSearchRemoveV  call <SID>CoremoSearch_removeV()
+
+if !exists('g:CoremoSearch_setDefaultMap') 
+    let g:CoremoSearch_setDefaultMap = 1
+endif
+
+if !exists('g:CoremoSearch_useSearchHook') 
+    let g:CoremoSearch_useSearchHook = 0
+endif
 
 if !exists('g:CoremoSearch_colors')
     let g:CoremoSearch_colors = [
@@ -70,6 +58,41 @@ if !exists('g:CoremoSearch_colors')
         \ {'bg': 'darkcyan',    'fg': 'white'},
         \ ]
 endif
+
+
+if g:CoremoSearch_setDefaultMap
+    nnoremap  <C-@>          :CoremoSearchAdd<CR>
+    vnoremap  <C-@>          :CoremoSearchAddV<CR>
+    nnoremap  <Leader><C-@>  :CoremoSearchRemove<CR>
+    vnoremap  <Leader><C-@>  :CoremoSearchRemoveV<CR>
+endif
+
+if g:CoremoSearch_useSearchHook == 1
+    nnoremap <Leader>/  :call <SID>CoremoSearch__hookSearchStart()<CR>/
+elseif g:CoremoSearch_useSearchHook == 2
+    nnoremap /          :call <SID>CoremoSearch__hookSearchStart()<CR>/
+endif
+
+
+"-----------------
+" implementations
+"-----------------
+
+function! s:CoremoSearch__hookSearchStart()
+    let b:CoremoSearch__atSlash = @/
+    cnoremap  <CR>   <CR>:execute 'cunmap <'.'CR>'<CR>:execute 'cunmap <'.'ESC>'<CR>:call <SID>CoremoSearch__hookSearchEnd()<CR>:echo<CR>
+    cnoremap  <ESC>  <CR>:execute 'cunmap <'.'CR>'<CR>:execute 'cunmap <'.'ESC>'<CR>:echo<CR>
+
+endfunction
+
+function! s:CoremoSearch__hookSearchEnd()
+    if !exists('b:CoremoSearch__atSlash') | let b:CoremoSearch__atSlash = '' | endif
+    let word = @/
+    let @/ = b:CoremoSearch__atSlash
+    if word == b:CoremoSearch__atSlash | return | endif
+
+    execute 'CoremoSearchAdd '.word
+endfunction
 
 
 function! s:CoremoSearch_add(...)
