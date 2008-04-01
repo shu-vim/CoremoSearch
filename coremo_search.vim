@@ -164,7 +164,7 @@ function! s:CoremoSearch__removeInner(expr)
 endfunction
 
 function! s:CoremoSearch__escape(expr)
-    return escape(a:expr, '\$.*/[]^')
+    return escape(a:expr, '\$.*/[]^"')
 endfunction
 
 function! s:CoremoSearch__splitRegexpr(expr)
@@ -209,7 +209,7 @@ function! s:CoremoSearch__refreshHightlights(words)
     call s:CoremoSearch__initHighlights()
     let colorsCount = len(g:CoremoSearch_colors)
     for i in range(len(a:words))
-        execute 'syntax match CoremoSearch'.(i%colorsCount)." '".a:words[i]."' containedin=ALL"
+        execute 'syntax match CoremoSearch'.(i%colorsCount).' "'.a:words[i].'" containedin=ALL'
     endfor
 endfunction
 
