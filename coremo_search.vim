@@ -5,9 +5,14 @@
 "   This script provides simultaneous search functionality.
 "
 "   You can add a string that you want to search and remove a string.
-"   Color highlighting is available setting :set[l] nohlsearch.
+"
+"   (from 0.2) Color highlighting is available setting :set[l] nohlsearch.
+"   (from 0.3) Hooking / or <Leader>/ is available. (needs some variables to be set)
 "
 " Usage:
+"   For more detailed usage, see around 'interfaces to users'
+"                                       ^^^^ try  vi'<C-@>  on this string!!
+"
 "   A. Adding a word (like asterisk(*) keystroke)
 "       1. Place the cursor on the word that you want to search.
 "       2. Press <C-@> or :CoremoSearchAdd
@@ -29,48 +34,79 @@
 "       2. Press <Learder><C-@> or :CoremoSearchRemoveV
 "           (in most cases, <Leader> equals to backslash(\) keystroke)
 "
-" Last Change: 30-Mar-2008
+"
+" Last Change: 1-Apr-2008
 
 "---------------------
 " interfaces to users
 "---------------------
 
 command!  -range -nargs=*  CoremoSearchAdd      call <SID>CoremoSearch_add(<f-args>)
-command!  -range           CoremoSearchAddV     call <SID>CoremoSearch_addV()
-command!  -range           CoremoSearchRemove   call <SID>CoremoSearch_remove()
-command!  -range           CoremoSearchRemoveV  call <SID>CoremoSearch_removeV()
+        " This command may take ZERO, ONE, or MORE THAN ONE args.
+        "     - With no args, it adds a word under the cursor to the search target.
+        "     - With arg(s), it adds REGEXPs that are passed to the search target.
+        " Examples:
+        "     :CoremoSearchAdd
+        "     :CoremoSearchAdd word
+        "     :CoremoSearchAdd word world
+        "     :CoremoSearchAdd worl\?d
+command!  -range  CoremoSearchAddV     call <SID>CoremoSearch_addV()
+        " This command is used in visual mode.
+        " This command takes no arg.
+        "     - It adds a selected string to the search target.
+command!  -range  CoremoSearchRemove   call <SID>CoremoSearch_remove()
+        " This command takes no arg.
+        "     - It removes a word under the cursor from the search target.
+command!  -range  CoremoSearchRemoveV  call <SID>CoremoSearch_removeV()
+        " This command is used in visual mode.
+        " This command takes no arg.
+        "     - It removes a selected string from the search target.
 
 if !exists('g:CoremoSearch_setDefaultMap') 
     let g:CoremoSearch_setDefaultMap = 1
+    " Set this var 0 or 1.
+    "
+    " 0: the default keymap definitions in this script file is DISABLED.
+    " 1: the definitions are ENABLED.
 endif
-
-if !exists('g:CoremoSearch_useSearchHook') 
-    let g:CoremoSearch_useSearchHook = 0
-endif
-
-if !exists('g:CoremoSearch_colors')
-    let g:CoremoSearch_colors = [
-        \ {'bg': 'darkred',     'fg': 'white'},
-        \ {'bg': 'darkgreen',   'fg': 'white'},
-        \ {'bg': 'brown',       'fg': 'white'},
-        \ {'bg': 'darkblue',    'fg': 'white'},
-        \ {'bg': 'darkmagenta', 'fg': 'white'},
-        \ {'bg': 'darkcyan',    'fg': 'white'},
-        \ ]
-endif
-
 
 if g:CoremoSearch_setDefaultMap
+    " the default keymap
+
     nnoremap  <C-@>          :CoremoSearchAdd<CR>
     vnoremap  <C-@>          :CoremoSearchAddV<CR>
     nnoremap  <Leader><C-@>  :CoremoSearchRemove<CR>
     vnoremap  <Leader><C-@>  :CoremoSearchRemoveV<CR>
 endif
 
+if !exists('g:CoremoSearch_useSearchHook') 
+    let g:CoremoSearch_useSearchHook = 0
+    " Set this var 0, 1 or 2.
+    "
+    " 0: using commands and the default keymaps(if enabled).
+    " 1: the result of  <Leader>/  keystroke will be redirected to CoremoSearchAdd command.
+    " 2: the result of  /          keystroke will be redirected to CoremoSearchAdd command.
+    " 
+    " Even if g:CoremoSearch_setDefaultMap == 0, this variable may define keymaps.
+endif
+
 if g:CoremoSearch_useSearchHook == 1
     nnoremap <Leader>/  :call <SID>CoremoSearch__hookSearchStart()<CR>/
 elseif g:CoremoSearch_useSearchHook == 2
     nnoremap /          :call <SID>CoremoSearch__hookSearchStart()<CR>/
+endif
+
+if !exists('g:CoremoSearch_colors')
+    " color highlighting
+
+    let g:CoremoSearch_colors = [
+        \ {'bg': 'darkred',     'fg': 'white'}, " 1st word
+        \ {'bg': 'darkgreen',   'fg': 'white'}, " 2nd word
+        \ {'bg': 'brown',       'fg': 'white'}, " 3rd word
+        \ {'bg': 'darkblue',    'fg': 'white'}, " 4th word
+        \ {'bg': 'darkmagenta', 'fg': 'white'}, " 5th word
+        \ {'bg': 'darkcyan',    'fg': 'white'}, " 6th word
+        \ ]
 endif
 
 
