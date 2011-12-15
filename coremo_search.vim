@@ -34,6 +34,24 @@
 "       2. Press <Learder><C-@> or :CoremoSearchRemoveV
 "           (in most cases, <Leader> equals to backslash(\) keystroke)
 "
+" Variables
+"
+"   (A right hand side value is a default value.)
+"
+"   g:CoremoSearch_setDefaultMap = 1
+"       allows this script set keymappings.
+"
+"           0: the default keymap definitions in this script file is DISABLED.
+"           1: the definitions are ENABLED.
+"
+"   g:CoremoSearch_useSearchHook = 0
+"       hooks  / or <Leader>/  and  n and N  to use this script's
+"       functionalities.
+"
+"           0: using commands and the default keymaps(if enabled).
+"           1: the result of  <Leader>/  keystroke will be redirected to CoremoSearchAdd command.
+"           2: the result of  /          keystroke will be redirected to CoremoSearchAdd command.
+"
 
 "---------------------
 " interfaces to users
