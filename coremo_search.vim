@@ -1,6 +1,6 @@
 " CoremoSearch -- A simple simultaneous search script.
 "
-" Maintainer: Shuhei Kubota <kubota.shuhei@gmail.com>
+" Maintainer: Shuhei Kubota <kubota.shuhei+vim@gmail.com>
 " Description:
 "   This script provides simultaneous search functionality.
 "
@@ -34,12 +34,15 @@
 "       2. Press <Learder><C-@> or :CoremoSearchRemoveV
 "           (in most cases, <Leader> equals to backslash(\) keystroke)
 "
-"
-" Last Change: 1-Apr-2008
 
 "---------------------
 " interfaces to users
 "---------------------
+
+augroup CoremoSearch
+    autocmd!
+    autocmd  WinEnter    * call <SID>CoremoSearch__refreshHightlights(<SID>CoremoSearch__splitRegexpr(@/))
+augroup END
 
 command!  -range -nargs=*  CoremoSearchAdd      call <SID>CoremoSearch_add(<f-args>)
         " This command may take ZERO, ONE, or MORE THAN ONE args.
@@ -292,6 +295,10 @@ endfunction
 
 function! s:CoremoSearch__refreshHightlights(words)
     if &hlsearch | return | endif
+
+    if &ignorecase
+        syntax case ignore
+    endif
 
     call s:CoremoSearch__initHighlights()
     let colorsCount = len(g:CoremoSearch_colors)
