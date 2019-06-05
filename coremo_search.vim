@@ -210,9 +210,22 @@ function! s:CoremoSearch_list()
         return
     endif
 
-    let title = ['CoremoSearch', '(mark x to delete)', '--------------------']
+    let title = ['CoremoSearch', '(mark x to delete, ? : help)', '------------------------------']
     let searchings = map(copy(all), 1)
-    let ctx = {'select':len(all)-1, 'title':title, 'items':all, 'searchings':searchings}
+    let ctx = {
+                \ 'select':len(all)-1,
+                \ 'title':title,
+                \ 'items':all,
+                \ 'searchings':searchings,
+                \ 'help':0,
+                \ 'helpmsg':[
+                    \ 'j, k: move cursor',
+                    \ 'h, l, x, sp: mark/unmark',
+                    \ 'Enter: apply',
+                    \ 'Esc, q: quit',
+                    \ '------------------------------',
+                    \ ],
+                \ }
     let winid = popup_create(title+all, {
                 \ 'border': [1,1,1,1],
                 \ 'filter': function('s:CoremoSearch__filterPopup', [ctx]),
@@ -244,6 +257,22 @@ function! s:CoremoSearch__filterPopup(ctx, winid, c)
 
     elseif a:c ==# "\<Esc>" || a:c ==# "q"
         call popup_close(a:winid)
+
+    elseif a:c ==# '?'
+        call popup_close(a:winid)
+        let a:ctx.help = !a:ctx.help
+
+        let lines = a:ctx.title
+        if a:ctx.help
+            let lines = lines + a:ctx.helpmsg
+        endif
+        let lines = lines + a:ctx.items
+
+        let winid = popup_create(lines, {
+                    \ 'border': [1,1,1,1],
+                    \ 'filter': function('s:CoremoSearch__filterPopup', [a:ctx]),
+                    \ })
+        call s:CoremoSearch__refreshPopup(winid, a:ctx)
     endif
     return 1
 endfunction
@@ -264,7 +293,14 @@ function! s:CoremoSearch__refreshPopup(winid, ctx)
             let items[i] = '  ' .. items[i]
         endif
     endfor
-    call setbufline(bufnr, 1, a:ctx.title + items)
+
+    let lines = a:ctx.title
+    if a:ctx.help
+        let lines = lines + a:ctx.helpmsg
+    endif
+    let lines = lines + items
+
+    call setbufline(bufnr, 1, lines)
 endfunction
 
 function! s:CoremoSearch__getSelectedWord()
