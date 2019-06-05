@@ -204,7 +204,7 @@ function! s:CoremoSearch_removeV()
     endif
 endfunction
 
-function! s:CoremoSearch_list()
+function! s:CoremoSearch_list() abort
     let all = s:CoremoSearch__splitRegexpr(@/)
     if len(all) == 0
         return
@@ -233,7 +233,7 @@ function! s:CoremoSearch_list()
     call s:CoremoSearch__refreshPopup(winid, ctx)
 endfunction
 
-function! s:CoremoSearch__filterPopup(ctx, winid, c)
+function! s:CoremoSearch__filterPopup(ctx, winid, c) abort
     if a:c ==# 'j'
         let a:ctx.select += a:ctx.select ==# len(a:ctx.items)-1 ? 0 : 1
         call s:CoremoSearch__refreshPopup(a:winid, a:ctx)
@@ -277,7 +277,7 @@ function! s:CoremoSearch__filterPopup(ctx, winid, c)
     return 1
 endfunction
 
-function! s:CoremoSearch__refreshPopup(winid, ctx)
+function! s:CoremoSearch__refreshPopup(winid, ctx) abort
     let bufnr = winbufnr(a:winid)
     let items = copy(a:ctx.items)
     for i in range(len(a:ctx.items))
