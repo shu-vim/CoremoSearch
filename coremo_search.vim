@@ -82,6 +82,9 @@ command!  -range  CoremoSearchRemoveV  call <SID>CoremoSearch_removeV()
         " This command is used in visual mode.
         " This command takes no arg.
         "     - It removes a selected string from the search target.
+if exists('*popup_create()')
+    command!  -range  CoremoSearchList  call <SID>CoremoSearch_list()
+endif
 
 if !exists('g:CoremoSearch_setDefaultMap') 
     let g:CoremoSearch_setDefaultMap = 1
@@ -199,6 +202,69 @@ function! s:CoremoSearch_removeV()
     else
         echo ''
     endif
+endfunction
+
+function! s:CoremoSearch_list()
+    let all = s:CoremoSearch__splitRegexpr(@/)
+    if len(all) == 0
+        return
+    endif
+
+    let title = ['CoremoSearch', '(mark x to delete)', '--------------------']
+    let searchings = map(copy(all), 1)
+    let ctx = {'select':len(all)-1, 'title':title, 'items':all, 'searchings':searchings}
+    let winid = popup_create(title+all, {
+                \ 'border': [1,1,1,1],
+                \ 'filter': function('s:CoremoSearch__filterPopup', [ctx]),
+                \ })
+    call s:CoremoSearch__refreshPopup(winid, ctx)
+endfunction
+
+function! s:CoremoSearch__filterPopup(ctx, winid, c)
+    if a:c ==# 'j'
+        let a:ctx.select += a:ctx.select ==# len(a:ctx.items)-1 ? 0 : 1
+        call s:CoremoSearch__refreshPopup(a:winid, a:ctx)
+    elseif a:c ==# 'k'
+        let a:ctx.select -= a:ctx.select ==# 0 ? 0 : 1
+        call s:CoremoSearch__refreshPopup(a:winid, a:ctx)
+    elseif a:c ==# ' ' || a:c ==# 'h' || a:c ==# 'l' || a:c ==# 'x'
+        let a:ctx.searchings[a:ctx.select] = !a:ctx.searchings[a:ctx.select]
+        call s:CoremoSearch__refreshPopup(a:winid, a:ctx)
+    elseif a:c ==# "\n" || a:c ==# "\r"
+        call popup_close(a:winid)
+
+        let all = []
+        for i in range(len(a:ctx.items))
+            if a:ctx.searchings[i]
+                call add(all, a:ctx.items[i])
+            endif
+        endfor
+        let @/ = join(all, '\|')
+        if ! &hlsearch | call s:CoremoSearch__refreshHightlights(all) | endif
+
+    elseif a:c ==# "\<Esc>" || a:c ==# "q"
+        call popup_close(a:winid)
+    endif
+    return 1
+endfunction
+
+function! s:CoremoSearch__refreshPopup(winid, ctx)
+    let bufnr = winbufnr(a:winid)
+    let items = copy(a:ctx.items)
+    for i in range(len(a:ctx.items))
+        if a:ctx.searchings[i]
+            let items[i] = '  ' .. items[i]
+        else
+            let items[i] = 'x ' .. items[i]
+        endif
+
+        if i == a:ctx.select
+            let items[i] = '> ' .. items[i]
+        else
+            let items[i] = '  ' .. items[i]
+        endif
+    endfor
+    call setbufline(bufnr, 1, a:ctx.title + items)
 endfunction
 
 function! s:CoremoSearch__getSelectedWord()
